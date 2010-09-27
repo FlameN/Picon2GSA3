@@ -58,21 +58,21 @@ void vLogicaTask(void *pvParameters)
 	dbgInit();
 	dbgmessage(	"\n\r=====================================\n\r= Albert shklovich DBG WINDOW ==\n\r=====================================");
 	dbgStackFreeSize("\nLogica Task");
-	dbgmessage("DbgInit ...ok \n");
+	dbgmessage("DbgInit ...ok ");
 	dbgmessage("Mem Init ...");
 	MemInit();
 
-	dbgmessage("ok \n");
+	dbgmessage("ok ");
 	dbgmessage("TWI Init ...");
 	AT91F_TWI_Init();
-	dbgmessage("ok \n");
+	dbgmessage("ok ");
 	dbgmessage("SPI Init ...");
 	SPI_Init();
-	dbgmessage("ok \n");
+	dbgmessage("ok ");
 	dbgmessage("RTC Init ...");
 	rtcInit();
-	dbgmessage("ok \n");
-	dbgmessage("Starting tasks...\n");
+	dbgmessage("ok ");
+	dbgmessage("Starting tasks...");
 
 	xTaskCreate(vGprsConTask, (const signed portCHAR * const ) "vGprsCon",
 			vGprsConTask_STACK_SIZE, NULL, vGprsConTask_PRIORITY, (xTaskHandle *) NULL);
@@ -80,9 +80,10 @@ void vLogicaTask(void *pvParameters)
 	xTaskCreate(vRs485Task, (const signed portCHAR * const ) "vRs485",
 			vRs485Task_STACK_SIZE, NULL, vRs485Task_PRIORITY,
 			(xTaskHandle *) NULL);
-
+#ifndef COM1_AS_DEBUGPORT
 	xTaskCreate(vUsart1Task, (const signed portCHAR * const ) "vUsart1",
 			vUsart1Task_STACK_SIZE, NULL, vUsart1Task_PRIORITY, (xTaskHandle *) NULL);
+#endif
 
 	xTaskCreate(vUsbTask, (const signed portCHAR * const ) "vUsb",
 			vUsbTask_STACK_SIZE, NULL, vUsbTask_PRIORITY, (xTaskHandle *) NULL);
@@ -92,8 +93,8 @@ void vLogicaTask(void *pvParameters)
 			(xTaskHandle *) NULL);
 
 	dbgHeapFreeSize();
-	dbgStackFreeSize("\n\rLogica Task");
-	dbgmessage("Starting Translator \n");
+	dbgStackFreeSize("Logica Task");
+	dbgmessage("Starting Translator ");
 
 #ifdef TESTBOARD
 	SetRelayToRam(3, 1); // initial state of rele

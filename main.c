@@ -63,12 +63,12 @@ void vApplicationIdleHook(void)
     {
 
     }
-//extern void pppIdleIncMSec();
+extern void GprsIdleIncMSec();
 void vApplicationTickHook(void)
     {
     rtcIncrementSoftClockMs();
     atcIncrementCounter();
-//    pppIdleIncMSec();
+    GprsIdleIncMSec();
     }
 void vApplicationMallocFailedHook()
 {

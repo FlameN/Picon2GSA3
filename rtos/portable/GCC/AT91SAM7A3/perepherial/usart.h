@@ -16,6 +16,7 @@ typedef struct
     xQueueHandle hTxQueue;
     AT91PS_PDC hPDC;
     int rxSize;
+    int bufSize;
   } AT91_USART_DEV;
 
 typedef enum

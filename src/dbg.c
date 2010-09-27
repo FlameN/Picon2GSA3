@@ -9,6 +9,8 @@
 #include "semphr.h"
 #include "typedef.h"
 #include "board.h"
+#include "usart.h"
+#include "dbg.h"
 
 #define ADDRETURN 1;
 #include "dbgupdc.h"
@@ -16,10 +18,16 @@ char strbuffer[128];
 
 xSemaphoreHandle xdbgMutex;
 
+
+
 void dbgInit()
 {
 	xdbgMutex = xSemaphoreCreateMutex();
+#ifndef COM1_AS_DEBUGPORT
 	Dbgu_init(AT91C_DBGU_BAUD);
+#else
+	AT91F_USART_OPEN(AT91_USART_COM1_ID, AT91C_DBGU_BAUD, AT91C_US_ASYNC_MODE);
+#endif
 }
 
 void dbgmessage(char *str)
@@ -28,20 +36,31 @@ void dbgmessage(char *str)
 	{
 		if (xSemaphoreTake(xdbgMutex, (portTickType) 100) == pdTRUE)
 		{
+#ifndef COM1_AS_DEBUGPORT
 
-				AT91F_DBGU_TRANSMIT((unsigned char *) "Hello ", 6);
+
 			AT91F_DBGU_TRANSMIT((unsigned char *) str, strlen(str));
 			while (AT91F_DBGU_TCR() != 0)
 			{
 				vTaskDelay(1);/*wait for transmittion*/
 			};
+#else
+			AT91F_USART_SEND(&COM1,(unsigned char *) str, strlen(str));
+#endif
+
 #ifdef ADDRETURN
-			AT91F_DBGU_TRANSMIT((unsigned char *) "\n\r", 2);
+
+#ifndef COM1_AS_DEBUGPORT
+
+				AT91F_DBGU_TRANSMIT((unsigned char *) "\n\r", 2);
 			while (AT91F_DBGU_TCR() != 0)
 			{
 				vTaskDelay(1);/*wait for transmittion*/
 			};
-#endif
+#else
+			AT91F_USART_SEND(&COM1,(unsigned char *) "\n\r", 2);
+#endif //COM1_AS_DEBUGPORT
+#endif //ADDRETURN
 			xSemaphoreGive(xdbgMutex);
 		}
 

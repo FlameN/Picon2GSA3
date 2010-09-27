@@ -66,12 +66,16 @@
 #define LED_MASK        (LED1|LED2|LED3|LED_485)
 
 #define MODENABLE            AT91C_PIO_PB13
+
 #define MODEM_RST            AT91C_PIO_PA5
+
+#define MODEM_ENABLE { AT91F_PIO_ClearOutput(AT91C_BASE_PIOA, MODEM_RST);}
+#define  MODEM_DISABLE { AT91F_PIO_SetOutput(AT91C_BASE_PIOA, MODEM_RST);}
 
 #define USART2_RTS           AT91C_PIO_PB27
 
 
-#define OUTPIN_MASK      (MODENABLE|LED_MASK|USART2_RTS)
+#define OUTPIN_MASK      (MODENABLE|LED_MASK|USART2_RTS|MODEM_RST)
 //#define DISIN_MASK       (DISKRET1)
 
 /*------------------*/

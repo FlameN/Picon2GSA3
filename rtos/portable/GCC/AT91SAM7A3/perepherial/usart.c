@@ -43,7 +43,7 @@ void AT91F_US_INTERRUPT_COM0(void);
 void AT91_US0_ISR_ENTRY(void)
     {
     portSAVE_CONTEXT();
-    AT91F_US_INTERRUPT_COM0();
+    AT91F_US_INTERRUPT(&COM0);
     portRESTORE_CONTEXT();
     }
 void AT91_US1_ISR_ENTRY(void)
@@ -59,38 +59,6 @@ void AT91_US2_ISR_ENTRY(void)
     portRESTORE_CONTEXT();
     }
 //===============================================================================================
-void AT91F_US_INTERRUPT_COM0()
-    {
-    unsigned int status = COM0.hPort->US_CSR;
-    int size;
-    portBASE_TYPE xTaskWokenByPost = pdFALSE;
-
-    status &= COM0.hPort->US_IMR;
-
-    if ((status & AT91C_US_TIMEOUT))
-	{
-	// COM0.rxSize = COM0.rxSize - (int) COM0.hPort->US_RCR;
-	AT91F_US_DisableIt(COM0.hPort, AT91C_US_TIMEOUT | AT91C_US_RXBUFF);
-	AT91F_US_DisableRx(COM0.hPort);
-	COM0_RX = COM0_RX - (int) COM0.hPort->US_RCR;
-	xQueueSendFromISR(COM0.hRxQueue, (void *) (&size), &xTaskWokenByPost);
-
-	}
-    if ((status & AT91C_US_TXEMPTY))
-	{
-	//   size = (int) COM0.hPort->US_TCR;
-	xQueueSendFromISR(COM0.hTxQueue, (void *) &size, &xTaskWokenByPost);
-	AT91F_US_DisableIt(COM0.hPort, AT91C_US_TXEMPTY);
-	AT91F_US_DisableTx(COM0.hPort);
-	}
-
-    if (xTaskWokenByPost)
-	{
-	portYIELD_FROM_ISR();
-	}
-
-    AT91C_BASE_AIC->AIC_EOICR = 0;
-    }
 void AT91F_US_INTERRUPT(AT91_USART_DEV *mdev)
     {
     unsigned int status = mdev->hPort->US_CSR;
@@ -100,10 +68,10 @@ void AT91F_US_INTERRUPT(AT91_USART_DEV *mdev)
 
     if ((status & AT91C_US_TIMEOUT))
 	{
-	mdev->rxSize -= (int) mdev->hPort->US_RCR;
-	xQueueSendFromISR(mdev->hRxQueue, (void *) (&size), &xTaskWokenByPost);
-	AT91F_US_DisableIt(mdev->hPort, AT91C_US_TIMEOUT | AT91C_US_RXBUFF);
-	AT91F_US_DisableRx(mdev->hPort);
+		mdev->rxSize = mdev->bufSize - (int) mdev->hPort->US_RCR;
+		xQueueSendFromISR(mdev->hRxQueue, (void *) (&size), &xTaskWokenByPost);
+		AT91F_US_DisableIt(mdev->hPort, AT91C_US_TIMEOUT | AT91C_US_RXBUFF);
+		AT91F_US_DisableRx(mdev->hPort);
 	}
     if ((status & AT91C_US_TXEMPTY))
 	{
@@ -148,21 +116,6 @@ inline void AT91F_US_START_RECEIVE(AT91PS_USART COM, uint8 *data, int size)
     portEXIT_CRITICAL();
 
     }
-//===============================================================================================
-void AT91F_USART_SEND_COM0(uint8 *data, int size)
-    {
-    int Param;
-
-    portENTER_CRITICAL();
-	{
-	AT91F_US_START_TRANSMITION(COM0.hPort, data, size);
-	}
-    portEXIT_CRITICAL();
-    xQueueReceive(COM0.hTxQueue, (void *) &Param, (portTickType) 1000);
-    AT91F_US_DisableIt(COM0.hPort, AT91C_US_TXEMPTY);
-    AT91F_US_DisableTx(COM0.hPort);
-
-    }
 
 //===============================================================================================
 void AT91F_USART_SEND(AT91_USART_DEV *dev, uint8 *data, int size)
@@ -182,38 +135,17 @@ void AT91F_USART_SEND(AT91_USART_DEV *dev, uint8 *data, int size)
     }
 //===============================================================================================
 int AT91F_USART_RECEIVE(AT91_USART_DEV *dev, uint8 *data, int dsize,
-	int timeout)
-    {
-    dev->rxSize = dsize;
-    AT91F_US_START_RECEIVE(dev->hPort, data, dsize);
-
-    if (xQueueReceive(dev->hRxQueue, (void *) &dsize, (portTickType) timeout)
-	    == pdFALSE)
-	{
+		int timeout)
+{
+	dev->bufSize = dsize;
 	dev->rxSize = 0;
-	}
-    AT91F_US_DisableIt(dev->hPort, AT91C_US_TIMEOUT);
-    AT91F_US_DisableRx(dev->hPort);
-    return (dev->rxSize);
-    }
+	AT91F_US_START_RECEIVE(dev->hPort, data, dsize);
+	xQueueReceive(dev->hRxQueue, (void *) &dsize, (portTickType) timeout);
+	AT91F_US_DisableIt(dev->hPort, AT91C_US_TIMEOUT);
+	AT91F_US_DisableRx(dev->hPort);
+	return (dev->rxSize);
+}
 //===============================================================================================
-int AT91F_USART_RECEIVE_COM0(uint8 *data, int dsize, int timeout)
-    {
-    int temp;
-    COM0_RX = dsize;
-    AT91F_US_START_RECEIVE(COM0.hPort, data, COM0_RX);
-    if (xQueueReceive(COM0.hRxQueue, (void *) &dsize, (portTickType) timeout)
-	    == pdFALSE)
-	{
-	COM0_RX = 0;
-	}
-    temp = COM0_RX;
-    COM0_RX = 0;
-    AT91F_US_DisableIt(COM0.hPort, AT91C_US_TIMEOUT);
-    AT91F_US_DisableRx(COM0.hPort);
-    return (temp);
-    }
-
 void AT91F_USART_OPEN(AT91_USART_ID idPort, long BaudRate, int mode)
     {
     portENTER_CRITICAL();

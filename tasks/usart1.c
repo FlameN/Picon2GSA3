@@ -9,10 +9,13 @@
 RVNET_DATATYPE us1size;
 uint8 us1buf[256];
 
+
+
 void vUsart1Task(void *pvParameters)
 {
 	/* The parameters are not used. */
 	(void) pvParameters;
+
 	AT91F_USART_OPEN(AT91_USART_COM1_ID, 115200, AT91C_US_ASYNC_MODE);
 	while (1)
 	{
