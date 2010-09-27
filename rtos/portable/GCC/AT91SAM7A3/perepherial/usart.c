@@ -212,7 +212,13 @@ void AT91F_USART_OPEN(AT91_USART_ID idPort, long BaudRate, int mode)
 	    COM2.hError = ErrorCreate("US2_Error");
 	    AT91F_PDC_DisableTx(COM2.hPDC);
 	    AT91F_PDC_DisableRx(COM2.hPDC);
-	    AT91F_US2_CfgPIO(); //* Define RXD and TXD as peripheral
+	    //AT91F_US2_CfgPIO(); //* Define RXD and TXD as peripheral
+	    // Configure PIO controllers to periph mode
+	    		AT91F_PIO_CfgPeriph(
+	    			AT91C_BASE_PIOA, // PIO controller base address
+	    			((unsigned int) AT91C_PA10_TXD2    ) |
+	    			((unsigned int) AT91C_PA9_RXD2    ), // Peripheral A
+	    			0); // Peripheral B
 	    AT91F_PMC_EnablePeriphClock(AT91C_BASE_PMC, 1 << AT91C_ID_US2); // First, enable the clock of the PIOB
 	    AT91F_US_Configure(COM2.hPort, MCK, mode, BaudRate, 0); // Usart Configure
 	    AT91F_AIC_ConfigureIt(AT91C_BASE_AIC, AT91C_ID_US2,

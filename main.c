@@ -55,8 +55,8 @@ void prvSetupHardware(void)
     //     AT91F_PMC_EnablePeriphClock( AT91C_BASE_PMC, 1 << AT91C_ID_PIOA );
     AT91C_BASE_PMC->PMC_PCER = 1 << AT91C_ID_PIOA;
     AT91C_BASE_PMC->PMC_PCER = 1 << AT91C_ID_PIOB;
-    AT91F_PIO_CfgOutput(AT91C_BASE_PIOB, OUTPIN_MASK);
-    AT91F_PIO_CfgOutput(AT91C_BASE_PIOA, MODEM_RST);
+    AT91F_PIO_CfgOutput(AT91C_BASE_PIOB, OUTPIN_MASKB);
+    AT91F_PIO_CfgOutput(AT91C_BASE_PIOA, OUTPIN_MASKA);
 
     }
 void vApplicationIdleHook(void)

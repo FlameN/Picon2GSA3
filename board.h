@@ -53,15 +53,15 @@
 #define LED4            (1<<4)  /* PB4 */
 #define LED_485            (1<<4)  /* PB4 */
 
-#define LED_WORK_RED(v)		{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED1)} \
-							else {AT91F_PIO_CleanOutput(AT91C_BASE_PIOB, LED1)};
-#define LED_WORK_GREEN(v)	{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED2)} \
-							else{AT91F_PIO_CleanOutput(AT91C_BASE_PIOB, LED2)};
+#define LED_WORK_RED(v)		{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED1);} \
+							else {AT91F_PIO_ClearOutput(AT91C_BASE_PIOB, LED1);}};
+#define LED_WORK_GREEN(v)	{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED2);} \
+							else{AT91F_PIO_ClearOutput(AT91C_BASE_PIOB, LED2);}};
 
-#define LED_MODE_RED(v)		{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED3)} \
-							else {AT91F_PIO_CleanOutput(AT91C_BASE_PIOB, LED3)};
-#define LED_MODE_GREEN(v)	{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED4)} \
-							else{AT91F_PIO_CleanOutput(AT91C_BASE_PIOB, LED4)};
+#define LED_MODE_RED(v)		{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED3);} \
+							else {AT91F_PIO_ClearOutput(AT91C_BASE_PIOB, LED3);}};
+#define LED_MODE_GREEN(v)	{if(v != 0){AT91F_PIO_SetOutput(AT91C_BASE_PIOB, LED4);} \
+							else{AT91F_PIO_ClearOutput(AT91C_BASE_PIOB, LED4);}};
 
 #define LED_MASK        (LED1|LED2|LED3|LED_485)
 
@@ -74,8 +74,13 @@
 
 #define USART2_RTS           AT91C_PIO_PB27
 
+#define RS485_RECEIVE_MODE()      {AT91F_PIO_ClearOutput(AT91C_BASE_PIOB, USART2_RTS);}
+#define RS485_SEND_MODE()         {AT91F_PIO_SetOutput(AT91C_BASE_PIOB, USART2_RTS);}
 
-#define OUTPIN_MASK      (MODENABLE|LED_MASK|USART2_RTS|MODEM_RST)
+
+#define OUTPIN_MASKA      (MODEM_RST)
+#define OUTPIN_MASKB      (MODENABLE|LED_MASK|USART2_RTS)
+
 //#define DISIN_MASK       (DISKRET1)
 
 /*------------------*/
